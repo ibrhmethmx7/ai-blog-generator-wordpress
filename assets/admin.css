@@ -1,0 +1,504 @@
+/* AI Blog Generator Admin Styles */
+
+.aiblog-container {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.aiblog-form {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.aiblog-form h2 {
+    margin-top: 0;
+    color: #1d2327;
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.aiblog-form .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+    font-weight: 600;
+}
+
+.aiblog-form .form-table td {
+    padding: 20px 10px;
+}
+
+.aiblog-form .regular-text {
+    width: 400px;
+}
+
+.aiblog-form select {
+    min-width: 200px;
+}
+
+.aiblog-result {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.aiblog-result h2 {
+    margin-top: 0;
+    color: #1d2327;
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.blog-preview {
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.blog-preview h3 {
+    color: #1d2327;
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.blog-preview #generated-content {
+    line-height: 1.6;
+    color: #50575e;
+}
+
+.blog-preview #generated-content p {
+    margin-bottom: 15px;
+}
+
+.blog-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.blog-actions .button {
+    min-width: 120px;
+    text-align: center;
+}
+
+.aiblog-loading {
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0073aa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.aiblog-loading p {
+    color: #50575e;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .aiblog-container {
+        margin: 10px;
+    }
+    
+    .aiblog-form .regular-text {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .blog-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .blog-actions .button {
+        margin-bottom: 5px;
+    }
+}
+
+/* Form Enhancement */
+.aiblog-form .form-table input[type="text"],
+.aiblog-form .form-table select {
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.aiblog-form .form-table input[type="text"]:focus,
+.aiblog-form .form-table select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.aiblog-form .description {
+    color: #646970;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Button Styling */
+#generate-btn {
+    font-size: 16px !important;
+    padding: 10px 20px !important;
+    height: auto !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#generate-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Success/Error Messages */
+.aiblog-message {
+    padding: 12px 16px;
+    margin: 15px 0;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+
+.aiblog-message.success {
+    background-color: #f0f6fc;
+    border-left-color: #00a32a;
+    color: #00a32a;
+}
+
+.aiblog-message.error {
+    background-color: #fcf0f1;
+    border-left-color: #d63638;
+    color: #d63638;
+}
+
+/* Settings Page Specific */
+.ai-blog-settings .form-table input[type="password"] {
+    width: 400px;
+}
+
+/* Blog preview improvements */
+.blog-preview {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.blog-preview h3 {
+    border-bottom: 2px solid #0073aa;
+    padding-bottom: 10px;
+}
+
+.blog-preview #generated-content h2 {
+    color: #0073aa;
+    font-size: 1.3em;
+    margin: 20px 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.blog-preview #generated-content h3 {
+    color: #333;
+    font-size: 1.1em;
+    margin: 15px 0 8px 0;
+}
+
+.blog-preview #generated-content ul,
+.blog-preview #generated-content ol {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.blog-preview #generated-content li {
+    margin-bottom: 5px;
+    line-height: 1.6;
+}
+
+.blog-preview #generated-content blockquote {
+    border-left: 4px solid #0073aa;
+    margin: 20px 0;
+    padding: 10px 20px;
+    background: #f8f9fa;
+    font-style: italic;
+}
+
+/* Image preview in content */
+.aiblog-image {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.aiblog-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: opacity 0.3s ease;
+}
+
+.aiblog-image img.loading {
+    opacity: 0.5;
+}
+
+.aiblog-image figcaption {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Image placeholder styles */
+.aiblog-image-placeholder {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.aiblog-image-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.aiblog-image-placeholder p {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.aiblog-image-placeholder small {
+    color: #868e96;
+    font-size: 12px;
+}
+
+/* Loading state for images */
+.aiblog-auto-image {
+    transition: all 0.3s ease;
+}
+
+.aiblog-auto-image.loading {
+    opacity: 0.6;
+    filter: blur(1px);
+}
+
+/* Image error states */
+.aiblog-image.error img {
+    display: none;
+}
+
+.aiblog-image.error .aiblog-image-placeholder {
+    display: block !important;
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+}
+
+/* Image retry button */
+.aiblog-image-retry {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 15px;
+    background: #007cba;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+}
+
+.aiblog-image-retry:hover {
+    background: #005a87;
+    color: white;
+}
+
+/* Tabs styling */
+.nav-tab-wrapper {
+    border-bottom: 1px solid #c3c4c7;
+    margin-bottom: 20px;
+}
+
+.nav-tab {
+    background: #f1f1f1;
+    border: 1px solid #c3c4c7;
+    color: #0073aa;
+    text-decoration: none;
+    padding: 10px 15px;
+    margin-right: 5px;
+    border-bottom: none;
+}
+
+.nav-tab-active {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    color: #000;
+}
+
+.tab-content {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+}
+
+/* Statistics display */
+.aiblog-stats {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1;
+    min-width: 120px;
+}
+
+.stat-item .stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0073aa;
+    display: block;
+}
+
+.stat-item .stat-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Enhanced button styles */
+.button.button-ai-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    text-shadow: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.button.button-ai-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+}
+
+/* Progress bar for generation */
+.generation-progress {
+    width: 100%;
+    height: 4px;
+    background: #f0f0f1;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.generation-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #0073aa, #005177);
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+
+/* Keyword highlighting */
+.keyword-highlight {
+    background: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .blog-preview {
+        background: #1e1e1e;
+        border-color: #3c434a;
+        color: #f0f0f1;
+    }
+    
+    .blog-preview h3 {
+        color: #f0f0f1;
+        border-bottom-color: #0087be;
+    }
+    
+    .blog-preview #generated-content {
+        color: #d0d0d0;
+    }
+    
+    .blog-preview #generated-content h2 {
+        color: #0087be;
+        border-bottom-color: #444;
+    }
+    
+    .blog-preview #generated-content h3 {
+        color: #ccc;
+    }
+    
+    .aiblog-stats {
+        background: #2c2c2c;
+        border-color: #444;
+    }
+    
+    .tab-content {
+        background: #1e1e1e;
+        border-color: #444;
+    }
+}
