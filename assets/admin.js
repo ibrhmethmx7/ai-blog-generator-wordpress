@@ -50,7 +50,7 @@ jQuery(document).ready(function($) {
             length: $('#blog_length').val(),
             audience: $('#target_audience').val(),
             keywords: $('#keywords').val(),
-            auto_publish: $('#auto_publish').is(':checked')
+            post_action: $('input[name="post_action"]:checked').val()
         };
         
         // Validation
@@ -78,10 +78,17 @@ jQuery(document).ready(function($) {
                     displayBlogResult(response);
                     
                     if (response.post_id) {
-                        showMessage(
-                            `Blog yazısı başarıyla oluşturuldu ve yayınlandı! <a href="${response.post_url}" target="_blank">Görüntüle</a>`,
-                            'success'
-                        );
+                        if (response.post_status === 'draft') {
+                            showMessage(
+                                `${response.message} <a href="${response.edit_url}" target="_blank">Düzenle</a> | <a href="admin.php?page=ai-blog-management">Blog Yönetimi</a>`,
+                                'success'
+                            );
+                        } else {
+                            showMessage(
+                                `${response.message} <a href="${response.post_url}" target="_blank">Görüntüle</a>`,
+                                'success'
+                            );
+                        }
                     } else {
                         showMessage('Blog yazısı başarıyla oluşturuldu!', 'success');
                     }

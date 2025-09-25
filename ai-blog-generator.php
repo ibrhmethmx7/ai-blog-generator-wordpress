@@ -48,6 +48,24 @@ class AIBlogGenerator {
         
         add_submenu_page(
             'ai-blog-generator',
+            'Yeni Blog Oluştur',
+            'Yeni Blog',
+            'manage_options',
+            'ai-blog-generator',
+            array($this, 'admin_page')
+        );
+        
+        add_submenu_page(
+            'ai-blog-generator',
+            'Blog Yönetimi',
+            'Blog Yönetimi',
+            'manage_options',
+            'ai-blog-management',
+            array($this, 'management_page')
+        );
+        
+        add_submenu_page(
+            'ai-blog-generator',
             'Ayarlar',
             'Ayarlar',
             'manage_options',
@@ -130,13 +148,21 @@ class AIBlogGenerator {
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="auto_publish">Otomatik Yayınla</label>
+                                    <label for="post_action">İşlem</label>
                                 </th>
                                 <td>
                                     <label>
-                                        <input type="checkbox" id="auto_publish" name="auto_publish" />
-                                        Oluşturulduktan sonra otomatik olarak yayınla
+                                        <input type="radio" name="post_action" value="draft" checked />
+                                        Taslak olarak kaydet (Sonra düzenleyebilirim)
                                     </label>
+                                    <br>
+                                    <label>
+                                        <input type="radio" name="post_action" value="publish" />
+                                        Direkt yayınla
+                                    </label>
+                                    <p class="description">
+                                        Taslak seçerseniz, Blog Yönetimi'nden düzenleyip yayınlayabilirsiniz.
+                                    </p>
                                 </td>
                             </tr>
                         </table>
@@ -384,6 +410,299 @@ class AIBlogGenerator {
         <?php
     }
     
+    public function management_page() {
+        // Handle actions
+        if (isset($_GET['action']) && isset($_GET['post_id'])) {
+            $action = sanitize_text_field($_GET['action']);
+            $post_id = intval($_GET['post_id']);
+            
+            switch ($action) {
+                case 'delete':
+                    if (wp_verify_nonce($_GET['_wpnonce'], 'delete_aiblog_' . $post_id)) {
+                        wp_delete_post($post_id, true);
+                        echo '<div class="notice notice-success"><p>Blog yazısı silindi!</p></div>';
+                    }
+                    break;
+                case 'publish':
+                    if (wp_verify_nonce($_GET['_wpnonce'], 'publish_aiblog_' . $post_id)) {
+                        wp_update_post(array('ID' => $post_id, 'post_status' => 'publish'));
+                        echo '<div class="notice notice-success"><p>Blog yazısı yayınlandı!</p></div>';
+                    }
+                    break;
+                case 'draft':
+                    if (wp_verify_nonce($_GET['_wpnonce'], 'draft_aiblog_' . $post_id)) {
+                        wp_update_post(array('ID' => $post_id, 'post_status' => 'draft'));
+                        echo '<div class="notice notice-success"><p>Blog yazısı taslağa alındı!</p></div>';
+                    }
+                    break;
+            }
+        }
+        
+        // Get AI generated posts
+        $ai_posts = get_posts(array(
+            'meta_key' => '_aiblog_generated',
+            'meta_value' => true,
+            'post_status' => array('publish', 'draft', 'pending'),
+            'numberposts' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+        
+        ?>
+        <div class="wrap">
+            <h1>🤖 AI Blog Yönetimi</h1>
+            
+            <?php if (empty($ai_posts)): ?>
+                <div class="aiblog-empty-state">
+                    <div style="text-align: center; padding: 60px 20px; background: #fff; border: 1px solid #ddd; border-radius: 8px;">
+                        <h2>📝 Henüz AI Blog Yazısı Yok</h2>
+                        <p>AI ile ilk blog yazınızı oluşturmak için başlayın!</p>
+                        <a href="<?php echo admin_url('admin.php?page=ai-blog-generator'); ?>" class="button button-primary button-large">
+                            <span class="dashicons dashicons-plus-alt"></span> Yeni Blog Oluştur
+                        </a>
+                    </div>
+                </div>
+            <?php else: ?>
+                
+                <div class="aiblog-stats-bar">
+                    <div class="stats-item">
+                        <span class="stats-number"><?php echo count($ai_posts); ?></span>
+                        <span class="stats-label">Toplam Blog</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-number"><?php echo count(array_filter($ai_posts, function($p) { return $p->post_status === 'publish'; })); ?></span>
+                        <span class="stats-label">Yayında</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-number"><?php echo count(array_filter($ai_posts, function($p) { return $p->post_status === 'draft'; })); ?></span>
+                        <span class="stats-label">Taslak</span>
+                    </div>
+                    <div class="stats-item">
+                        <a href="<?php echo admin_url('admin.php?page=ai-blog-generator'); ?>" class="button button-primary">
+                            <span class="dashicons dashicons-plus-alt"></span> Yeni Blog
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="aiblog-posts-grid">
+                    <?php foreach ($ai_posts as $post): 
+                        $word_count = get_post_meta($post->ID, '_aiblog_word_count', true);
+                        $keywords = get_post_meta($post->ID, '_aiblog_keywords', true);
+                        $generated_date = get_post_meta($post->ID, '_aiblog_generated_date', true);
+                        $thumbnail = get_the_post_thumbnail_url($post->ID, 'medium');
+                        ?>
+                        <div class="aiblog-post-card" data-post-id="<?php echo $post->ID; ?>">
+                            <div class="post-thumbnail">
+                                <?php if ($thumbnail): ?>
+                                    <img src="<?php echo esc_url($thumbnail); ?>" alt="<?php echo esc_attr($post->post_title); ?>">
+                                <?php else: ?>
+                                    <div class="no-thumbnail">
+                                        <span class="dashicons dashicons-camera"></span>
+                                        <small>Kapak resmi yok</small>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="post-status status-<?php echo $post->post_status; ?>">
+                                    <?php echo ucfirst($post->post_status); ?>
+                                </div>
+                            </div>
+                            
+                            <div class="post-content">
+                                <h3><?php echo esc_html($post->post_title); ?></h3>
+                                <p class="post-excerpt"><?php echo esc_html(wp_trim_words($post->post_excerpt ?: $post->post_content, 20)); ?></p>
+                                
+                                <div class="post-meta">
+                                    <span><strong>📅</strong> <?php echo date('d M Y', strtotime($post->post_date)); ?></span>
+                                    <?php if ($word_count): ?>
+                                        <span><strong>📝</strong> <?php echo $word_count; ?> kelime</span>
+                                    <?php endif; ?>
+                                    <?php if ($keywords): ?>
+                                        <span><strong>🏷️</strong> <?php echo esc_html($keywords); ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <div class="post-actions">
+                                <a href="<?php echo get_edit_post_link($post->ID); ?>" class="button button-secondary">
+                                    <span class="dashicons dashicons-edit"></span> Düzenle
+                                </a>
+                                
+                                <?php if ($post->post_status === 'draft'): ?>
+                                    <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=ai-blog-management&action=publish&post_id=' . $post->ID), 'publish_aiblog_' . $post->ID); ?>" 
+                                       class="button button-primary">
+                                        <span class="dashicons dashicons-visibility"></span> Yayınla
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?php echo get_permalink($post->ID); ?>" class="button button-secondary" target="_blank">
+                                        <span class="dashicons dashicons-external"></span> Görüntüle
+                                    </a>
+                                    <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=ai-blog-management&action=draft&post_id=' . $post->ID), 'draft_aiblog_' . $post->ID); ?>" 
+                                       class="button button-secondary">
+                                        <span class="dashicons dashicons-hidden"></span> Taslağa Al
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <div class="post-actions-more">
+                                    <button class="button button-link-delete" onclick="if(confirm('Bu blog yazısını silmek istediğinizden emin misiniz?')) { window.location.href='<?php echo wp_nonce_url(admin_url('admin.php?page=ai-blog-management&action=delete&post_id=' . $post->ID), 'delete_aiblog_' . $post->ID); ?>'; }">
+                                        <span class="dashicons dashicons-trash"></span> Sil
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <style>
+        .aiblog-stats-bar {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        
+        .stats-item {
+            text-align: center;
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            min-width: 100px;
+        }
+        
+        .stats-number {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0073aa;
+        }
+        
+        .stats-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .aiblog-posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .aiblog-post-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .aiblog-post-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .post-thumbnail {
+            position: relative;
+            height: 200px;
+            background: #f8f9fa;
+        }
+        
+        .post-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .no-thumbnail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+        }
+        
+        .no-thumbnail .dashicons {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .post-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-publish {
+            background: #00a32a;
+            color: white;
+        }
+        
+        .status-draft {
+            background: #dba617;
+            color: white;
+        }
+        
+        .status-pending {
+            background: #646970;
+            color: white;
+        }
+        
+        .post-content {
+            padding: 20px;
+        }
+        
+        .post-content h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            line-height: 1.4;
+        }
+        
+        .post-excerpt {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .post-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .post-actions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .post-actions .button {
+            font-size: 13px;
+            padding: 6px 12px;
+            height: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .post-actions-more {
+            margin-left: auto;
+        }
+        </style>
+        <?php
+    }
+    
     public function generate_ai_blog() {
         check_ajax_referer('aiblog_nonce', 'nonce');
         
@@ -396,7 +715,7 @@ class AIBlogGenerator {
         $length = sanitize_text_field($_POST['length']);
         $audience = sanitize_text_field($_POST['audience']);
         $keywords = sanitize_text_field($_POST['keywords']);
-        $auto_publish = isset($_POST['auto_publish']) ? true : false;
+        $post_action = sanitize_text_field($_POST['post_action']);
         
         $blog_content = $this->call_openai_api($topic, $style, $length, $audience, $keywords);
         
@@ -408,10 +727,19 @@ class AIBlogGenerator {
                 'excerpt' => $blog_content['excerpt']
             );
             
-            if ($auto_publish) {
+            if ($post_action === 'publish' || $post_action === 'draft') {
+                $blog_content['post_status'] = $post_action;
                 $post_id = $this->create_wordpress_post($blog_content);
                 $response['post_id'] = $post_id;
                 $response['post_url'] = get_permalink($post_id);
+                $response['edit_url'] = get_edit_post_link($post_id, 'raw');
+                $response['post_status'] = $post_action;
+                
+                if ($post_action === 'draft') {
+                    $response['message'] = 'Blog yazısı taslak olarak kaydedildi! Blog Yönetimi\'nden düzenleyebilirsiniz.';
+                } else {
+                    $response['message'] = 'Blog yazısı başarıyla yayınlandı!';
+                }
             }
         } else {
             $response = array(
@@ -622,10 +950,23 @@ class AIBlogGenerator {
         }
         
         $content = $data['choices'][0]['message']['content'];
+        
+        // Debug: Log AI response
+        error_log('AI Blog Generator - Raw AI Response: ' . $content);
+        
         $blog_data = json_decode($content, true);
         
         if (!$blog_data) {
+            // Try to extract JSON if wrapped in markdown
+            if (preg_match('/```json\s*(.*?)\s*```/s', $content, $matches)) {
+                $blog_data = json_decode($matches[1], true);
+                error_log('AI Blog Generator - Extracted JSON from markdown');
+            }
+        }
+        
+        if (!$blog_data) {
             // JSON parse hatası varsa, basit metin olarak döndür
+            error_log('AI Blog Generator - JSON parse failed, using fallback format');
             return array(
                 'title' => 'About ' . $topic,
                 'content' => $content,
@@ -636,13 +977,23 @@ class AIBlogGenerator {
             );
         }
         
+        // Debug: Log parsed data
+        error_log('AI Blog Generator - Parsed blog data: ' . print_r($blog_data, true));
+        
         // Resimleri fetch et ve içeriğe ekle
         if (isset($blog_data['image_suggestions']) && !empty($blog_data['image_suggestions'])) {
+            error_log('AI Blog Generator - Image suggestions found: ' . print_r($blog_data['image_suggestions'], true));
             $images = $this->fetch_unsplash_images($blog_data['image_suggestions'], $keywords);
+            error_log('AI Blog Generator - Fetched images: ' . print_r($images, true));
             if (!empty($images)) {
                 $blog_data['content'] = $this->insert_images_into_content($blog_data['content'], $images);
                 $blog_data['images'] = $images;
+                error_log('AI Blog Generator - Images inserted into content');
+            } else {
+                error_log('AI Blog Generator - No images could be fetched');
             }
+        } else {
+            error_log('AI Blog Generator - No image suggestions in AI response');
         }
         
         // SEO meta tags ekle
@@ -1112,11 +1463,13 @@ class AIBlogGenerator {
         $default_category = get_option('aiblog_default_category', 1);
         $default_author = get_option('aiblog_default_author', 1);
         
+        $post_status = isset($blog_content['post_status']) ? $blog_content['post_status'] : 'draft';
+        
         $post_data = array(
             'post_title' => $blog_content['title'],
             'post_content' => $blog_content['content'],
             'post_excerpt' => $blog_content['excerpt'],
-            'post_status' => 'publish',
+            'post_status' => $post_status,
             'post_author' => $default_author,
             'post_category' => array($default_category),
             'meta_input' => array(
